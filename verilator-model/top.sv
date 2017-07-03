@@ -22,7 +22,8 @@
 
 module top
 #(
-  parameter ADDR_WIDTH = 16,
+  parameter INSTR_RDATA_WIDTH = 32,
+  parameter ADDR_WIDTH = 22,		// Consistent with PicoRV32
   parameter BOOT_ADDR  = 'h80		// Consistent with Pulpino
   )
 (
@@ -67,7 +68,11 @@ module top
 
    // Instantiate the core
 
-   riscv_core riscv_core_i
+   riscv_core
+     #(
+       .INSTR_RDATA_WIDTH (INSTR_RDATA_WIDTH)
+       )
+   riscv_core_i
      (
       .clk_i               ( clk_i          ),
       .rst_ni              ( rstn_i         ),
@@ -118,7 +123,7 @@ module top
 
    ram
      #(
-       .ADDR_WIDTH (ADDR_WIDTH)
+       .ADDR_WIDTH (ADDR_WIDTH - 2)
        )
    ram_i
      (
