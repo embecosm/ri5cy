@@ -30,53 +30,58 @@ module dp_ram
     input  logic [3:0]             be_b_i
   );
 
-  localparam words = 2**ADDR_WIDTH;
+  localparam bytes = 2**ADDR_WIDTH;
 
-  logic [3:0][7:0] mem[words];
+  logic [7:0] mem[bytes];
 
   always @(posedge clk)
   begin
     if (en_a_i && we_a_i)
     begin
       if (be_a_i[0])
-        mem[addr_a_i][0] <= wdata_a_i[7:0];
+        mem[addr_a_i + 0] <= wdata_a_i[7:0];
       if (be_a_i[1])
-        mem[addr_a_i][1] <= wdata_a_i[15:8];
+        mem[addr_a_i + 1] <= wdata_a_i[15:8];
       if (be_a_i[2])
-        mem[addr_a_i][2] <= wdata_a_i[23:16];
+        mem[addr_a_i + 2] <= wdata_a_i[23:16];
       if (be_a_i[3])
-        mem[addr_a_i][3] <= wdata_a_i[31:24];
+        mem[addr_a_i + 3] <= wdata_a_i[31:24];
     end
 
-    rdata_a_o <= mem[addr_a_i >> 2];
+    rdata_a_o[ 7: 0] <= mem[addr_a_i + 0];
+    rdata_a_o[15: 8] <= mem[addr_a_i + 1];
+    rdata_a_o[23:16] <= mem[addr_a_i + 2];
+    rdata_a_o[31:24] <= mem[addr_a_i + 3];
 
     if (en_b_i && we_b_i)
     begin
       if (be_b_i[0])
-        mem[addr_b_i][0] <= wdata_b_i[7:0];
+        mem[addr_b_i + 0] <= wdata_b_i[7:0];
       if (be_b_i[1])
-        mem[addr_b_i][1] <= wdata_b_i[15:8];
+        mem[addr_b_i + 1] <= wdata_b_i[15:8];
       if (be_b_i[2])
-        mem[addr_b_i][2] <= wdata_b_i[23:16];
+        mem[addr_b_i + 2] <= wdata_b_i[23:16];
       if (be_b_i[3])
-        mem[addr_b_i][3] <= wdata_b_i[31:24];
+        mem[addr_b_i + 3] <= wdata_b_i[31:24];
     end
 
-    rdata_b_o <= mem[addr_b_i >> 2];
+    rdata_b_o[ 7: 0] <= mem[addr_b_i + 0];
+    rdata_b_o[15: 8] <= mem[addr_b_i + 1];
+    rdata_b_o[23:16] <= mem[addr_b_i + 2];
+    rdata_b_o[31:24] <= mem[addr_b_i + 3];
   end
 
   function [7:0] readByte;
     /* verilator public */
     input integer byte_addr;
-    readByte = mem[byte_addr / 4][byte_addr % 4];
+    readByte = mem[byte_addr];
   endfunction
 
   task writeByte;
     /* verilator public */
     input integer byte_addr;
     input [7:0] val;
-    mem[byte_addr / 4][byte_addr % 4] = val;
+    mem[byte_addr] = val;
   endtask
-
 
 endmodule
