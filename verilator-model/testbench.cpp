@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <cstdlib>
 
+using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -130,7 +131,7 @@ void waitForDebugHit()
   uint32_t dbg_hit;
   do {
       dbg_hit = debugRead(DBG_HIT);
-      std::cout << "DBG_HIT reg " << std::hex << dbg_hit << std::dec << std::endl;
+      cout << "DBG_HIT reg " << std::hex << dbg_hit << std::dec << endl;
   } while (!(dbg_hit & 1));
 }
 
@@ -145,11 +146,13 @@ void waitForDebugStall()
 
 void stepSingle ()
 {
-  std::cout << "DBG_CTRL  " << std::hex << debugRead(DBG_CTRL) << std::dec << std::endl;
-  std::cout << "DBG_HIT   " << std::hex << debugRead(DBG_HIT) << std::dec << std::endl;
-  std::cout << "DBG_CAUSE " << std::hex << debugRead(DBG_CAUSE) << std::dec << std::endl;
-  std::cout << "DBG_NPC   " << std::hex << debugRead(DBG_NPC) << std::dec << std::endl;
-  std::cout << "DBG_PPC   " << std::hex << debugRead(DBG_PPC) << std::dec << std::endl;
+  cout << "DBG_CTRL  " << std::hex << debugRead(DBG_CTRL) << std::dec << endl;
+  cout << "DBG_HIT   " << std::hex << debugRead(DBG_HIT) << std::dec << endl;
+  cout << "DBG_CAUSE " << std::hex << debugRead(DBG_CAUSE) << std::dec << endl;
+  cout << "DBG_NPC   " << std::hex << debugRead(DBG_NPC) << std::dec << endl;
+  cout << "DBG_PPC   " << std::hex << debugRead(DBG_PPC) << std::dec << endl;
+
+  cout << "About to do one single step" << endl;
 
   // Clear DBG_HIT
   debugWrite(DBG_HIT, 0);
@@ -262,8 +265,12 @@ main (int    argc,
   {
     cpu->fetch_enable_i = 1;
 
+    cout << "About to run for a few cycles" << endl;
+
     // Run for a few cycles normally
     clockSpin(3);
+
+    cout << "About to halt and set traps on exceptions" << endl;
 
     // Try to halt the CPU in the same way as in spi_debug_test.svh
     debugWrite(DBG_CTRL, debugRead(DBG_CTRL) | DBG_CTRL_HALT);
@@ -275,10 +282,22 @@ main (int    argc,
     // Set traps on exceptions
     debugWrite(DBG_IE, 0xF);
 
-    // Flush pipeline
-    debugWrite(DBG_NPC, debugRead(DBG_NPC));
+    cout << "About to halt" << endl;
 
+    uint32_t new_ctrl = debugRead(DBG_CTRL) & ~DBG_CTRL_HALT;
+    debugWrite(DBG_NPC, debugRead(DBG_NPC));
+    debugWrite(DBG_CTRL, new_ctrl);
+
+    cout << "Cycling clock whilst halted" << endl;
+    clockSpin(20);
+
+    cout << "Halting" << endl;
+
+    debugWrite(DBG_CTRL, debugRead(DBG_CTRL) | DBG_CTRL_HALT);
     waitForDebugStall();
+
+    cout << "Halted. Setting single step" << endl;
+
     // Set single step
     debugWrite(DBG_CTRL, DBG_CTRL_HALT | DBG_CTRL_SSTE);
     debugWrite(DBG_NPC, debugRead(DBG_NPC));
