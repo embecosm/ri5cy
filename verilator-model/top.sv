@@ -22,7 +22,7 @@
 
 module top
 #(
-  parameter INSTR_RDATA_WIDTH = 32,
+  parameter INSTR_RDATA_WIDTH = 128,
   parameter ADDR_WIDTH = 22,		// Consistent with PicoRV32
   parameter BOOT_ADDR  = 'h80		// Consistent with Pulpino
   )
@@ -55,7 +55,7 @@ module top
    logic 	          instr_gnt;
    logic 	          instr_rvalid;
    logic [ADDR_WIDTH-1:0] instr_addr;
-   logic [31:0] 	  instr_rdata;
+   logic [127:0] 	  instr_rdata;
 
    logic 		  data_req;
    logic 		  data_gnt;

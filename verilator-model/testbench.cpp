@@ -161,9 +161,6 @@ void stepSingle ()
   debugWrite(DBG_CTRL, DBG_CTRL_SSTE);
 
   waitForDebugStall();
-  debugWrite(DBG_NPC, debugRead(DBG_NPC));
-
-  // Halted again?
 }
 
 void loadProgram()
@@ -285,7 +282,6 @@ main (int    argc,
     cout << "About to halt" << endl;
 
     uint32_t new_ctrl = debugRead(DBG_CTRL) & ~DBG_CTRL_HALT;
-    debugWrite(DBG_NPC, debugRead(DBG_NPC));
     debugWrite(DBG_CTRL, new_ctrl);
 
     cout << "Cycling clock whilst halted" << endl;
@@ -300,7 +296,6 @@ main (int    argc,
 
     // Set single step
     debugWrite(DBG_CTRL, DBG_CTRL_HALT | DBG_CTRL_SSTE);
-    debugWrite(DBG_NPC, debugRead(DBG_NPC));
 
     // Try and step 5 instructions
     for (int j=0; j<5; j++) {

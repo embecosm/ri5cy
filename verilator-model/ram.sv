@@ -32,7 +32,7 @@ module ram
 
     input  logic                   instr_req_i,
     input  logic [ADDR_WIDTH-1:0]  instr_addr_i,
-    output logic [31:0]            instr_rdata_o,
+    output logic [127:0]           instr_rdata_o,
     output logic                   instr_rvalid_o,
     output logic                   instr_gnt_o,
 
