@@ -92,7 +92,8 @@ $(VLIB): $(VMK)
 	make -C $(VDIR) -f V$(TOP).mk
 
 $(VMK): $(VSRC)
-	verilator -Wno-CASEINCOMPLETE -Wno-LITENDIAN -Wno-UNOPT \
+	verilator -O3 -CFLAGS "-O3 -g3" \
+                  -Wno-CASEINCOMPLETE -Wno-LITENDIAN -Wno-UNOPT \
 	          -Wno-UNOPTFLAT -Wno-WIDTH -Wno-fatal --top-module top \
 	          --Mdir $(VDIR) --trace -DPULP_FPGA_EMUL -cc \
 	          +incdir+$(VINC) $(VSRC)
