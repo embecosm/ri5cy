@@ -85,7 +85,7 @@ module riscv_id_stage
     input  logic        is_compressed_i,
 
     input  logic [31:0] pc_if_i,
-    input  logic [31:0] pc_id_i,
+    input  logic [31:0] pc_id_i /* verilator public */,
 
     // Stalls
     output logic        halt_if_o,      // controller requests a halt of the IF stage
@@ -94,7 +94,7 @@ module riscv_id_stage
     input  logic        ex_ready_i,     // EX stage is ready for the next instruction
     input  logic        wb_ready_i,     // WB stage is ready for the next instruction
 
-    output logic        id_valid_o,     // ID stage is done
+    output logic        id_valid_o /* verilator public */,     // ID stage is done
     input  logic        ex_valid_i,     // EX stage is done
 
     // Pipeline ID/EX
@@ -239,7 +239,7 @@ module riscv_id_stage
     output logic        perf_ld_stall_o      // load-use-hazard
 );
 
-  logic [31:0] instr;
+  logic [31:0] instr /* verilator public */;
 
   // Decoder/Controller ID stage internal signals
   logic        deassert_we;
