@@ -184,7 +184,7 @@ module riscv_decoder
 
 
     unique case (instr_rdata_i[6:0])
-      7'f0f: begin //for now fence is a no-op
+      7'h0f: begin //for now fence is a no-op
 	 illegal_insn_o = 1'b0;
 
       end
