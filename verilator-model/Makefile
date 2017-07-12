@@ -26,11 +26,13 @@ CXXFLAGS = -Wall -Werror -std=c++11
 CXX = g++
 LD = g++
 
-# Binaries
+# Testbench
 
-EXE = testbench
+SRC = testbench.cpp
 
 OBJS = testbench.o
+
+EXE = testbench
 
 # top module name
 
@@ -63,43 +65,33 @@ VSRC = ../include/riscv_defines.sv        \
        ../riscv_core.sv                   \
        ../register_file_ff.sv             \
        top.sv
+
 VINC = ../include
 
-# May also want:
-#   $(VDIR)/verilated_dpi.o
+VINCS = $(VINC)/riscv_config.sv           \
+        $(VINC)/riscv_defines.sv          \
+        $(VINC)/riscv_tracer_defines.sv
 
-VOBJS = $(VDIR)/verilated.o       \
-        $(VDIR)/verilated_vcd_c.o
-
-VLIB = $(VDIR)/V$(TOP)__ALL.a
 
 VSMK = V$(TOP).mk
 VMK  = $(VDIR)/$(VSMK)
 
 # Build the executable
 
-$(EXE): $(VLIB) $(VOBJS) $(OBJS)
-	$(LD) -o $@ $(OBJS) $(VLIB) $(VOBJS)
+$(VDIR)/$(TOP): $(VDIR) $(VMK)
+	$(MAKE) -C $(VDIR) -f $(VSMK)
 
-$(VOBJS): $(VMK)
-	for f in $@; \
-	do \
-		sf=$$(basename $$f); \
-		$(MAKE) -C $(VDIR) -f $(VSMK) $$sf; \
-	done
+$(VDIR):
+	mkdir -p $@
 
-$(VLIB): $(VMK)
-	make -C $(VDIR) -f V$(TOP).mk
-
-$(VMK): $(VSRC)
-	verilator -O3 -CFLAGS "-O3 -g3" \
+$(VMK): $(VSRC) $(VINCS)
+	verilator -O3 -CFLAGS "-O3 -g3 -std=gnu++11" \
                   -Wno-CASEINCOMPLETE -Wno-LITENDIAN -Wno-UNOPT \
 	          -Wno-UNOPTFLAT -Wno-WIDTH -Wno-fatal --top-module top \
 	          --Mdir $(VDIR) --trace -DPULP_FPGA_EMUL -cc \
-	          +incdir+$(VINC) $(VSRC)
+	          +incdir+$(VINC) $(VSRC) $(SRC) --exe
 
 .PHONY: clean
 clean:
 	$(RM) -r $(VDIR)
-	$(RM) $(OBJS)
-	$(RM) $(EXE)
+	$(RM) $(EXE) $(OBJS)
