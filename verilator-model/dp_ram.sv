@@ -33,6 +33,9 @@ module dp_ram
   localparam bytes = 2**ADDR_WIDTH;
 
   logic [7:0] mem[bytes];
+  logic [19:0] addr_b_int;
+
+  always_comb addr_b_int = {addr_b_i[19:2], 2'b0};
 
   always @(posedge clk)
   begin
@@ -61,62 +64,18 @@ module dp_ram
       /* handle writes */
       if (we_b_i)
       begin
-        case (be_b_i[3:0])
-          /* full word store */
-          4'b1111:
-          begin
-            mem[addr_b_i    ] <= wdata_b_i[ 7: 0];
-            mem[addr_b_i + 1] <= wdata_b_i[15: 8];
-            mem[addr_b_i + 2] <= wdata_b_i[23:16];
-            mem[addr_b_i + 3] <= wdata_b_i[31:24];
-          end
-          /* single byte stores */
-          4'b0001: mem[addr_b_i] <= wdata_b_i[ 7: 0];
-          4'b0010: mem[addr_b_i] <= wdata_b_i[15: 8];
-          4'b0100: mem[addr_b_i] <= wdata_b_i[23:16];
-          4'b1000: mem[addr_b_i] <= wdata_b_i[31:24];
-          /* half-word stores */
-          4'b0011:
-          begin
-            mem[addr_b_i    ] <= wdata_b_i[ 7: 0];
-            mem[addr_b_i + 1] <= wdata_b_i[15: 8];
-          end
-          4'b1100:
-          begin
-            mem[addr_b_i    ] <= wdata_b_i[23:16];
-            mem[addr_b_i + 1] <= wdata_b_i[31:24];
-          end
-        endcase
+        if (be_b_i[0]) mem[addr_b_int    ] <= wdata_b_i[ 0+:8];
+        if (be_b_i[1]) mem[addr_b_int + 1] <= wdata_b_i[ 8+:8];
+        if (be_b_i[2]) mem[addr_b_int + 2] <= wdata_b_i[16+:8];
+        if (be_b_i[3]) mem[addr_b_int + 3] <= wdata_b_i[24+:8];
       end
       /* handle reads */
       else
       begin
-        case (be_b_i[3:0])
-          /* full word load */
-          4'b1111:
-          begin
-            rdata_b_o[ 7: 0] <= mem[addr_b_i    ];
-            rdata_b_o[15: 8] <= mem[addr_b_i + 1];
-            rdata_b_o[23:16] <= mem[addr_b_i + 2];
-            rdata_b_o[31:24] <= mem[addr_b_i + 3];
-          end
-          /* single byte loads */
-          4'b0001: rdata_b_o[ 7: 0] <= mem[addr_b_i];
-          4'b0010: rdata_b_o[15: 8] <= mem[addr_b_i];
-          4'b0100: rdata_b_o[23:16] <= mem[addr_b_i];
-          4'b1000: rdata_b_o[31:24] <= mem[addr_b_i];
-          /* half-word loads */
-          4'b0011:
-          begin
-            rdata_b_o[ 7: 0] <= mem[addr_b_i    ];
-            rdata_b_o[15: 8] <= mem[addr_b_i + 1];
-          end
-          4'b1100:
-          begin
-            rdata_b_o[23:16] <= mem[addr_b_i    ];
-            rdata_b_o[31:24] <= mem[addr_b_i + 1];
-          end
-        endcase
+        rdata_b_o[ 7: 0] <= mem[addr_b_int    ];
+        rdata_b_o[15: 8] <= mem[addr_b_int + 1];
+        rdata_b_o[23:16] <= mem[addr_b_int + 2];
+        rdata_b_o[31:24] <= mem[addr_b_int + 3];
       end
     end
   end
