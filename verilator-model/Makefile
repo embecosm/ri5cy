@@ -72,10 +72,28 @@ VSRC = cluster_clock_gating.sv            \
 
 VINC = ../include
 
+VOBJS = $(VDIR)/verilated.o       \
+        $(VDIR)/verilated_vcd_c.o
+
+VLIB = $(VDIR)/V$(TOP)__ALL.a
+
 VSMK = V$(TOP).mk
 VMK  = $(VDIR)/$(VSMK)
 
 # Build the executable
+
+$(EXE): $(VLIB) $(VOBJS) $(OBJS)
+	$(LD) -o $@ $(OBJS) $(VLIB) $(VOBJS)
+
+$(VOBJS): $(VMK)
+	for f in $@; \
+	do \
+		sf=$$(basename $$f); \
+		$(MAKE) -C $(VDIR) -f $(VSMK) $$sf; \
+	done
+
+$(VLIB): $(VMK)
+	make -C $(VDIR) -f V$(TOP).mk
 
 $(VDIR)/$(TOP): $(VDIR) $(VMK)
 	$(MAKE) -C $(VDIR) -f $(VSMK)
