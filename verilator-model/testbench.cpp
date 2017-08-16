@@ -30,8 +30,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-bool USE_DEBUGGER = true;
-
 // Count of clock ticks
 
 static vluint64_t  cpuTime = 0;
@@ -250,72 +248,48 @@ main (int    argc,
 
   // Cycle through reset
   cpu->rstn_i = 0;
-  clockSpin(100);
+  clockSpin(5);
   cpu->rstn_i = 1;
 
-  // Put a few instructions at the boot address
+  // Put a few instructions in memory
   loadProgram();
 
-  // Do some ordinary clocked logic.
+  cout << "About to halt and set traps on exceptions" << endl;
 
-  if (USE_DEBUGGER)
-  {
-    cpu->fetch_enable_i = 1;
+  // Try to halt the CPU in the same way as in spi_debug_test.svh
+  debugWrite(DBG_CTRL, debugRead(DBG_CTRL) | DBG_CTRL_HALT);
 
-    cout << "About to run for a few cycles" << endl;
+  // Let things run for a few cycles while the CPU waits in a halted state,
+  // simply to check that doing so doesn't cause any errors.
+  clockSpin(5);
 
-    // Run for a few cycles normally
-    clockSpin(3);
+  // Set traps on exceptions
+  debugWrite(DBG_IE, 0xF);
 
-    cout << "About to halt and set traps on exceptions" << endl;
+  cout << "About to resume" << endl;
 
-    // Try to halt the CPU in the same way as in spi_debug_test.svh
-    debugWrite(DBG_CTRL, debugRead(DBG_CTRL) | DBG_CTRL_HALT);
+  uint32_t new_ctrl = debugRead(DBG_CTRL) & ~DBG_CTRL_HALT;
+  debugWrite(DBG_CTRL, new_ctrl);
 
-    // Let things run for a few cycles while the CPU waits in a halted state,
-    // simply to check that doing so doesn't cause any errors.
-    clockSpin(100);
+  // Enable fetch
+  cpu->fetch_enable_i = 1;
 
-    // Set traps on exceptions
-    debugWrite(DBG_IE, 0xF);
+  cout << "Cycling clock to run for a few instructions" << endl;
+  clockSpin(20);
 
-    cout << "About to halt" << endl;
+  cout << "Halting" << endl;
 
-    uint32_t new_ctrl = debugRead(DBG_CTRL) & ~DBG_CTRL_HALT;
-    debugWrite(DBG_CTRL, new_ctrl);
+  debugWrite(DBG_CTRL, debugRead(DBG_CTRL) | DBG_CTRL_HALT);
+  waitForDebugStall();
 
-    cout << "Cycling clock whilst halted" << endl;
-    clockSpin(20);
+  cout << "Halted. Setting single step" << endl;
 
-    cout << "Halting" << endl;
+  // Set single step
+  debugWrite(DBG_CTRL, DBG_CTRL_HALT | DBG_CTRL_SSTE);
 
-    debugWrite(DBG_CTRL, debugRead(DBG_CTRL) | DBG_CTRL_HALT);
-    waitForDebugStall();
-
-    cout << "Halted. Setting single step" << endl;
-
-    // Set single step
-    debugWrite(DBG_CTRL, DBG_CTRL_HALT | DBG_CTRL_SSTE);
-
-    // Try and step 5 instructions
-    for (int j=0; j<5; j++) {
-      stepSingle ();
-    }
-  } else {
-    cpu->fetch_enable_i = 1;
-
-    for (int i = 0; i < 100; i++)
-      {
-        cpu->clk_i = 0;
-        cpu->eval ();
-        cpuTime += 5;
-        tfp->dump (cpuTime);
-
-        cpu->clk_i = 1;
-        cpu->eval ();
-        cpuTime += 5;
-        tfp->dump (cpuTime);
-      }
+  // Try and step 5 instructions
+  for (int j=0; j<5; j++) {
+    stepSingle ();
   }
 
   // Close VCD
