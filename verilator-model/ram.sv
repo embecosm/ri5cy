@@ -11,8 +11,8 @@
 // RAM wrapper for RI5CY
 // Contributor: Jeremy Bennett <jeremy.bennett@embecosm.com>
 //
-// This maps the dp_ram module of pulpino to the instruction and data ports of
-// the RI5CY processor core.
+// This maps the dp_ram module to the instruction and data ports of the RI5CY
+// processor core.
 
 module ram
     #(
