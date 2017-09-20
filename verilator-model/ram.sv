@@ -1,27 +1,18 @@
+// Copyright 2017 Embecosm Limited <www.embecosm.com>
+// Copyright and related rights are licensed under the Solderpad Hardware
+// License, Version 0.51 (the “License”); you may not use this file except in
+// compliance with the License.  You may obtain a copy of the License at
+// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
+// or agreed to in writing, software, hardware and materials distributed under
+// this License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+
 // RAM wrapper for RI5CY
-
-// Copyright (C) 2017 Embecosm <www.embecosm.com>
-
 // Contributor: Jeremy Bennett <jeremy.bennett@embecosm.com>
-
-// This program is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by the Free
-// Software Foundation, either version 3 of the License, or (at your option)
-// any later version.
-
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-// more details.
-
-// You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
+//
 // This maps the dp_ram module of pulpino to the instruction and data ports of
 // the RI5CY processor core.
-
-// 4MB of RAM, matching the PicoRV32 implementation.
 
 module ram
     #(

@@ -1,21 +1,20 @@
+// Copyright 2017 Embecosm Limited <www.embecosm.com>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // Simple Verilator model test bench
-
-// Copyright (C) 2017  Embecosm Limited <www.embecosm.com>
-
 // Contributor Jeremy Bennett <jeremy.bennett@embecosm.com>
-
-// This program is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by the Free
-// Software Foundation, either version 3 of the License, or (at your option)
-// any later version.
-
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-// more details.
-
-// You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <http://www.gnu.org/licenses/>.
+// Contributor Graham Markall <graham.markall@embecosm.com>
 
 #include "verilated.h"
 #include "verilated_vcd_c.h"
@@ -47,15 +46,8 @@ const uint16_t DBG_PPC     = 0x2004;  //!< Prev PC
 
 // Debug register flags
 
-// FIXME: Changed to uint32_t to get to compile - constants too large. Check
-// the constants are correct.
 const uint32_t DBG_CTRL_HALT = 0x00010000;    //!< Halt core
 const uint32_t DBG_CTRL_SSTE = 0x00000001;    //!< Single step core
-
-// GDB register numbers
-
-const int REG_R0  = 0;                //!< GDB R0 regnum
-const int REG_R31 = 31;               //!< GDB R31 regnum
 
 static uint64_t mCycleCnt = 0;
 
