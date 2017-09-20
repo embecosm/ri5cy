@@ -54,6 +54,8 @@ static uint64_t mCycleCnt = 0;
 Vtop *cpu;
 VerilatedVcdC * tfp;
 
+// Clock the CPU for a given number of cycles, dumping to the trace file at
+// each clock edge.
 void clockSpin(uint32_t cycles)
 {
   for (uint32_t i = 0; i < cycles; i++)
@@ -70,6 +72,7 @@ void clockSpin(uint32_t cycles)
   }
 }
 
+// Read/write a debug register.
 void debugAccess(uint32_t addr, uint32_t& val, bool write_enable)
 {
   cpu->debug_req_i   = 1;
@@ -103,6 +106,7 @@ void debugAccess(uint32_t addr, uint32_t& val, bool write_enable)
   }
 }
 
+// Read a debug register
 uint32_t debugRead(uint32_t addr)
 {
   uint32_t val;
@@ -110,30 +114,24 @@ uint32_t debugRead(uint32_t addr)
   return val;
 }
 
+// Write a debug register
 void debugWrite(uint32_t addr, uint32_t val)
 {
   debugAccess(addr, val, true);
 }
 
-void waitForDebugHit()
-{
-  // Keep reading the DBG_HIT register until it is SSTH
-  uint32_t dbg_hit;
-  do {
-      dbg_hit = debugRead(DBG_HIT);
-      cout << "DBG_HIT reg " << std::hex << dbg_hit << std::dec << endl;
-  } while (!(dbg_hit & 1));
-}
-
-// Assumes stall could happen at any point - don't need to wait a cycle to check
+// Cycle the clock until the debug unit reports that the CPU is halted.
 void waitForDebugStall()
 {
+  // Assume that stall could happen at any point - we don't need to wait a cycle
+  // to check if it's stalled before reading
   while (!(debugRead(DBG_CTRL) & DBG_CTRL_HALT))
   {
     clockSpin(1);
   }
 }
 
+// Single-step the CPU
 void stepSingle ()
 {
   cout << "DBG_CTRL  " << std::hex << debugRead(DBG_CTRL) << std::dec << endl;
@@ -150,28 +148,28 @@ void stepSingle ()
   // Write SSTE into the debug register
   debugWrite(DBG_CTRL, DBG_CTRL_SSTE);
 
+  // Wait until the step is completed
   waitForDebugStall();
 }
 
+// Write some program code into memory:
+//
+// ; Store a word to memory first:
+// li a5, 64
+// li a4, 102
+// sw a4, 0(a5)
+// ; Repeated <repeat_factor> times (20 at present)
+//
+// ; Then do something a bit like _exit(0)
+// li a1, 0
+// li a2, 0
+// li a3, 0
+// li a7, 93
+// ecall
+//
+// Execution begins at 0x80, so that's where we write our code.
 void loadProgram()
 {
-  // Write some program code into memory:
-  //
-  // ; Store a word to memory first:
-  // li a5, 64
-  // li a4, 102
-  // sw a4, 0(a5)
-  // ; Repeated <repeat_factor> times (20 at present)
-  //
-  // ; Then do something a bit like _exit(0)
-  // li a1, 0
-  // li a2, 0
-  // li a3, 0
-  // li a7, 93
-  // ecall
-  //
-  // Execution begins at 0x80, so that's where we write our code.
-
   uint32_t addr = 0x80;
   uint32_t repeat_factor = 20;
   for (size_t i = 0; i < repeat_factor; i++)
@@ -224,10 +222,10 @@ int
 main (int    argc,
       char * argv[])
 {
+  // Instantiate the model
   cpu = new Vtop;
 
   // Open VCD
-
   Verilated::traceEverOn (true);
   tfp = new VerilatedVcdC;
   cpu->trace (tfp, 99);
@@ -263,7 +261,6 @@ main (int    argc,
   uint32_t new_ctrl = debugRead(DBG_CTRL) & ~DBG_CTRL_HALT;
   debugWrite(DBG_CTRL, new_ctrl);
 
-  // Enable fetch
   cpu->fetch_enable_i = 1;
 
   cout << "Cycling clock to run for a few instructions" << endl;
@@ -276,7 +273,6 @@ main (int    argc,
 
   cout << "Halted. Setting single step" << endl;
 
-  // Set single step
   debugWrite(DBG_CTRL, DBG_CTRL_HALT | DBG_CTRL_SSTE);
 
   // Try and step 5 instructions
@@ -293,8 +289,7 @@ main (int    argc,
   delete tfp;
   delete cpu;
 
-}	// main ()
-
+}
 
 //! Function to handle $time calls in the Verilog
 
@@ -304,7 +299,6 @@ sc_time_stamp ()
   return cpuTime;
 
 }
-
 
 // Local Variables:
 // mode: C++
