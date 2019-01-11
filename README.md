@@ -3,6 +3,8 @@
 This is a fork of the
 [PULP Platform RI5CY core](https://github.com/pulp-platform/riscv) for
 Verilator and GDB server development.
+**All essential parts developed in here have been merged back and are available 
+in the upstream repository.**
 
 RI5CY is a small 4-stage RISC-V core. It starte its life as a
 fork of the OR10N cpu core that is based on the OpenRISC ISA.
